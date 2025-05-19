@@ -46,6 +46,43 @@
  */
 
 
+document.addEventListener('DOMContentLoaded', function () {
+  const menuButton = document.getElementById('menuButton');
+  const dropdown = document.getElementById('headerDropdown');
+
+  menuButton.addEventListener('click', function (e) {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!dropdown.contains(e.target) && !menuButton.contains(e.target)) {
+      dropdown.classList.remove('show');
+    }
+  });
+})
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.message-control')) {
+      const messageHeader = e.target.closest('.message-header');
+      const dropdown = messageHeader.querySelector('.dropdown-menu-message');
+
+      document.querySelectorAll('.dropdown-menu-message.show').forEach(menu => {
+        if (menu !== dropdown) {
+          menu.classList.remove('show');
+        }
+      });
+
+      dropdown.classList.toggle('show');
+    } else if (!e.target.closest('.dropdown-menu-message')) {
+      document.querySelectorAll('.dropdown-menu-message.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+    }
+  });
+});
+
 {
   const USERNAME_REC = "username";
 
@@ -65,7 +102,13 @@
       messageElement.innerHTML = `
         <div class="message-header">
           <div class="message-author">${message.username}</div>
-          <button class="message-control"></button>
+          <button class="message-control">...</button>
+          <ul class="dropdown-menu-message">
+            <li>View</li>
+            <li>Edit</li>
+            <li>Delete</li>
+            <li>Item</li>
+          </ul>
         </div>
         <p class="message-text">${message.text}</p>
         <time class="message-time">${message.timestamp}</time>
@@ -74,7 +117,7 @@
       chatContainer.appendChild(messageElement);
     }
   }
-
+  
   function getMessages(cb) {
     fetch("http://localhost:4000/messages", {
       method: "GET",
