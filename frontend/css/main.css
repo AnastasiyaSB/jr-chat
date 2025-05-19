@@ -1,32 +1,147 @@
-body {
+html, body {
   font: 16px sans-serif;
   padding: 0;
+  height: 100%;
   margin: 0;
+  background: 
+    radial-gradient(
+      circle at bottom,
+      rgba(255, 182, 237, 0.6) 0%,
+      rgba(198, 146, 232, 0.4) 30%,
+      rgba(255, 255, 255, 0) 60%
+    )
+  
 }
 
 header {
+  align-items: center;
   background: #000;
   color: #fff;
+  display: flex;
   height: 5vh;
+  justify-content: center;
   padding: 10px 0;
+  position: relative;
   text-align: center;
 }
 
 header h1 {
   font-weight: normal;
   margin: 0;
+  position: relative;
+  
+}
+
+header h1::before{
+  background-image: url('../img/LogoHeader.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  content: "";
+  display: inline-block;
+  height: 36px;
+  margin-right: 30px;
+  width: 36px;
+}
+.menu-button {
+  background: transparent;
+  border: none;
+  position: absolute;
+  right: 2em;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.menu-button::after {
+  background: transparent;
+  border: none;
+  color: white;
+  content: '⋯';
+  cursor: pointer;
+  font-size: 2rem;
+  padding: 0.2em;
+}
+
+.dropdown-menu {
+  display: none;
+  margin: 0;
+  padding: 0.5em 0;
+  list-style: none;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 100%;
+  right: 2em;
+  width: max-content;
+  z-index: 1000;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu li {
+  color: black;
+  cursor: pointer;
+  padding: 0.5em 4.5em 0.5em 1.5em;
+  text-align: left;
 }
 
 .messages {
   height: 80vh;
   margin: 0 auto;
   overflow: auto;
-  width: 500px;
+  width: 70%;
 }
 
 .message {
   margin-bottom: 20px;
   width: 50%;
+}
+
+.message-header {
+  position: relative;
+  
+}
+
+.message-author {
+  margin-top: 0.6em;
+  font-weight: bold;
+}
+
+.message-control {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.7em;
+}
+
+.dropdown-menu-message {
+  display: none;
+  margin: 0;
+  padding: 0.5em 0;
+  list-style: none;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: max-content;
+  z-index: 1000;
+}
+
+.dropdown-menu-message.show {
+  display: block;
+}
+
+.dropdown-menu-message li {
+  color: black;
+  cursor: pointer;
+  padding: 0.5em 4.5em 0.5em 1.5em;
+  text-align: left;
 }
 
 .message-mine {
@@ -37,6 +152,7 @@ header h1 {
   display: flex;
   justify-content: space-between;
 }
+
 
 .message-text {
   background: #fff;
@@ -51,26 +167,132 @@ header h1 {
   font-size: 80%;
 }
 
-.form form {
-  align-items: center;
-  bottom: 0;
+.form {
   display: flex;
-  gap: 20px;
-  justify-content: center;
-  height: 5vh;
-  padding: 2em;
-  position: absolute;
-  vertical-align: middle;
+  justify-content: center; 
+  align-items: center;
+  height: 100%; 
   width: 100%;
 }
 
-.form textarea {
-  font: 16px sans-serif;
-  height: 1em;
-  padding: 0.5em;
-  width: 30em;
+.form form {
+  align-items: center;
+  bottom: 0;
+  background: transparent;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 2em;
+  position: absolute;
+  vertical-align: middle;
+  width: 70%;
 }
 
-.form button {
+.form textarea {
+  border-radius: 7px;
   font: 16px sans-serif;
+  height: 2em;
+  padding: 0.5em 3em 0.5em 0.5em;
+  width: 100%;
+  
+}
+.form textarea::-webkit-scrollbar {
+  display: none;
+}
+.form textarea:focus {
+  outline: 1px solid rgba(159, 204, 243, 0.8)
+}
+.form button {
+  background-color: #fff;
+  border: none;
+  color: transparent;
+  cursor: pointer;
+  font: 16px sans-serif;
+  padding: 0;
+  position: relative;
+  right: 4em;
+  width: 36px;
+  height: 36px;
+  
+}
+
+.form button::after{
+  background-image: url('../img/Send.svg');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  content: "";
+  display: inline-block;
+  height: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+  right: 0.1em;
+  width: 36px;
+}
+
+.username::backdrop {
+background: 
+  radial-gradient(
+    circle at 30% 60%, /* первая вспышка */
+    rgba(100, 4, 79, 1) 0%,
+    rgba(100, 4, 79, 0.7) 10%,
+    rgba(0, 0, 0, 1) 60%
+  ),
+  radial-gradient(
+    circle at 70% 40%, /* вторая вспышка, сине-фиолетовая */
+      rgba(106, 13, 173, 1) 0%,
+      rgba(106, 13, 173, 0.7) 10%,
+      rgba(0, 0, 0, 1) 60%
+  );
+  background-blend-mode: screen;
+  background-color: black;
+}
+
+.username {
+  border: 1px solid black;
+  border-radius: 7px;
+  max-height: 184px;
+  padding: 0;
+  width: 360px;
+}
+
+.username form {
+  display: flex;
+  flex-direction: column;
+  margin: 32px 20px;
+}
+
+
+fieldset {
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  /* margin-bottom: 1.5em; */
+  padding: 0;
+  max-width: 312px;
+}
+
+fieldset label {
+  color: #1B2B41B0;
+  margin-bottom: 6px;
+}
+
+fieldset input {
+  background-color: #1A38601A;
+  border: none;
+  border-radius: 5px;
+  height: 22px;
+  padding: 9px 7px;
+}
+
+.join-button {
+  background-color: #000000;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+  height: 30px;
+  margin-top: 24px;
 }
