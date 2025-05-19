@@ -193,6 +193,7 @@ header h1::before{
   font: 16px sans-serif;
   height: 2em;
   padding: 0.5em 3em 0.5em 0.5em;
+  resize: none;
   width: 100%;
   
 }
