@@ -45,7 +45,6 @@
  *   введенным именем, это сообщение показывается справа
  */
 
-
 document.addEventListener('DOMContentLoaded', function () {
   const menuButton = document.getElementById('menuButton');
   const dropdown = document.getElementById('headerDropdown');
@@ -64,12 +63,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('click', function (e) {
+    
     if (e.target.closest('.message-control')) {
       const messageHeader = e.target.closest('.message-header');
       const dropdown = messageHeader.querySelector('.dropdown-menu-message');
 
       document.querySelectorAll('.dropdown-menu-message.show').forEach(menu => {
         if (menu !== dropdown) {
+          
           menu.classList.remove('show');
         }
       });
@@ -252,4 +253,32 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   initApp();
+
+  
+
+  document.addEventListener('DOMContentLoaded', () => {
+    function logout() {
+      localStorage.removeItem(USERNAME_REC);
+      username = null;
+
+      const usernameInput = document.querySelector('.username input[name="username"]');
+      if (usernameInput) {
+        usernameInput.value = "";
+      }
+
+      initApp();
+    }
+
+    function setLogout() {
+      const logoutItem = document.getElementById('logoutItem');
+
+      logoutItem.addEventListener('click', function() {
+        logout();
+
+        document.getElementById('headerDropdown').classList.remove('show');
+      })
+    }
+    
+    setLogout();
+  });
 }
