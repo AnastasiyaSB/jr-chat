@@ -42,21 +42,60 @@ server.post("/messages", function(req: Request, res: Response) {
 
   // *Некрасивенько, что в одном if проводятся сразу все проверки username
   // потому что сложно сформировать адекватное сообщение об ошибке
-  if (typeof username !== "string" || username.length < 2 || username.length > 50) {
-    res.status(400).send({
-      message: "Incorrect username",
-    });
+  // if (typeof username !== "string" || username.length < 2 || username.length > 50) {
+  //   res.status(400).send({
+  //     message: "Incorrect username",
+  //   });
+
+  //   return;
+  // }
+
+  // if (typeof text !== "string" || text.length < 1 || text.length > 500) {
+  //   res.status(400).send({
+  //     message: "Incorrect message text",
+  //   });
+
+  //   return;
+  // }
+
+  function validateForm(username: unknown, text: unknown) {
+     if (typeof username !== "string") {
+      return { field: "username", message: "Incorrect username (Username must be a string)" };
+    }
+
+     if (username.length < 2) {
+      return { field: "username", message: "Incorrect length of username (too short)" };
+    }
+
+     if (username.length > 50) {
+      return { field: "username", message: "Incorrect length of username (too long)" };
+    }
+
+    if (typeof text !== "string") {
+      return { field: "text", message: "Incorrect message text (Message must be a string)" };
+    }
+
+    if (text.trim().length === 0) {
+      return { field: "text", message: "Message cannot be empty" };
+    }
+
+    if (text.length < 1) {
+      return { field: "text", message: "Incorrect length of message (too short)" };
+    }
+
+    if (text.length > 500) {
+      return { field: "text", message: "Incorrect length of message (too long)" };
+    }
 
     return;
   }
 
-  if (typeof text !== "string" || text.length < 1 || text.length > 500) {
-    res.status(400).send({
-      message: "Incorrect message text",
-    });
-
+  const error = validateForm(username, text);
+  if (error) {
+    res.status(400).send({ message: error.message });
     return;
   }
+
 
   const newMessage = {
     id: idIterator.next().value as number,
