@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       messageElement.innerHTML = `
         <div class="message-header">
-          <div class="message-author">${message.username}</div>
+          <div class="message-author">${message.username ?? `<span class="message-author-deleted">✖️ Пользователь удален</span>`}</div>
           <button class="message-control">...</button>
           <ul class="dropdown-menu-message">
             <li>View</li>

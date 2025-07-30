@@ -110,6 +110,10 @@ header h1::before{
   font-weight: bold;
 }
 
+.message-author-deleted {
+  color: #ccc;
+}
+
 .message-control {
   background: transparent;
   border: none;
