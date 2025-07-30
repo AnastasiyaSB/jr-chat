@@ -2,6 +2,11 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { Client } from "pg";
 
+type User = {
+  "user_id": number,
+  "username": string,
+};
+
 type Message = {
   "id": number,
   "username": string,
@@ -35,6 +40,11 @@ async function initServer() {
 
   server.get("/", function (req: Request, res: Response) {
     res.status(200).json("Hello from backend");
+  });
+
+  server.get("/users", async function(req: Request, res: Response) {
+    const usersResponse = await pgClient.query("SELECT * FROM users");
+    res.status(200).send(usersResponse.rows);
   });
 
   server.get("/messages", function (req: Request, res: Response) {
