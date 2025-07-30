@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import { Client } from "pg";
 
 type Message = {
   "id": number,
@@ -8,10 +9,11 @@ type Message = {
   "timestamp": string,
 };
 
+const client = new Client();
 const server = express();
-const PORT = 4000;
+const PORT = process.env.APP_PORT || 4000;
 
-const messages:Message[] = [];
+const messages: Message[] = [];
 
 function* infiniteSequence() {
   let i = 0;
@@ -20,45 +22,31 @@ function* infiniteSequence() {
   }
 }
 
-const idIterator = infiniteSequence();
+async function initServer() {
+  if (!process.env.PGUSER) {
+    throw new Error("Server cannot be started without database credentials provided in .env file");
+  }
 
-server.use(cors());
-server.use(express.json());
+  const idIterator = infiniteSequence();
 
-server.get("/", function(req: Request, res: Response) {
-  res.status(200).json("Hello from backend");
-});
+  server.use(cors());
 
-server.get("/messages", function(req: Request, res: Response) {
-  res.status(200).json([...messages]);
-});
+  server.use(express.json());
 
-server.post("/messages", function(req: Request, res: Response) {
-  const { username, text } = req.body;
+  server.get("/", function (req: Request, res: Response) {
+    res.status(200).json("Hello from backend");
+  });
 
-  // 2 Стратегии валидации
-  //   1. Проверяются все ошибки и отправляются скопом
-  //   2. Проверка останавливается на первой попавшейся ошибке и отправляется эта ошибка
+  server.get("/messages", function (req: Request, res: Response) {
+    res.status(200).json([...messages].filter((m) =>
+      Date.now() - +new Date(m.timestamp) < 1000 * 60 * 60 * 24 * 3
+    ));
+  });
 
-  // *Некрасивенько, что в одном if проводятся сразу все проверки username
-  // потому что сложно сформировать адекватное сообщение об ошибке
-  // if (typeof username !== "string" || username.length < 2 || username.length > 50) {
-  //   res.status(400).send({
-  //     message: "Incorrect username",
-  //   });
+  server.post("/messages", function (req: Request, res: Response) {
+    const { username, text } = req.body;
 
-  //   return;
-  // }
-
-  // if (typeof text !== "string" || text.length < 1 || text.length > 500) {
-  //   res.status(400).send({
-  //     message: "Incorrect message text",
-  //   });
-
-  //   return;
-  // }
-
-  function validateForm(username: unknown, text: unknown) {
+    function validateForm(username: unknown, text: unknown) {
      if (typeof username !== "string") {
       return { field: "username", message: "Incorrect username (Username must be a string)" };
     }
@@ -96,17 +84,30 @@ server.post("/messages", function(req: Request, res: Response) {
     return;
   }
 
+    const newMessage = {
+      id: idIterator.next().value as number,
+      text,
+      timestamp: new Date().toISOString(),
+      username,
+    };
 
-  const newMessage = {
-    id: idIterator.next().value as number,
-    text,
-    timestamp: new Date().toISOString(),
-    username,
-  };
+    messages.push(newMessage);
+    // INSERT INTO messages (user_id, text) VALUES (1, "Привет");
+    res.status(201).send(newMessage);
+  });
 
-  messages.push(newMessage);
-  res.status(201).send(newMessage);
+  await client.connect();
+
+  server.listen(PORT, function () {
+    console.log(`[server]: Server is running at http://localhost:${PORT}`);
+  });
+}
+
+process.on("exit", async function () {
+  await client.end();
 });
+
+initServer();
 
 server.listen(PORT, function() {
   console.log(`[server]: Server is running at http://localhost:${PORT}`);
