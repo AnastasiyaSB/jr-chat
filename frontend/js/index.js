@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const formData = new FormData(evt.target);
 
       const messageData = {
-        username: formData.get("username"),
+        user_id: formData.get("username"),
         text: formData.get("text"),
       };
 
@@ -225,12 +225,30 @@ document.addEventListener('DOMContentLoaded', function () {
       const formData = new FormData(formElement);
       const enteredUsername = formData.get("username");
 
-      localStorage.setItem(USERNAME_REC, enteredUsername);
+      fetch("http://localhost:4000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "username": enteredUsername,
+        }),
+      })
+        .then(function(authResponse) {
+          if (authResponse.status !== 200) {
+            //
+          }
 
-      usernameContainer.close();
-      usernameForm.onsubmit = null;
+          return authResponse.json();
+        })
+        .then(function(authResponseData) {
+          localStorage.setItem(USERNAME_REC, authResponseData.user_id);
 
-      initApp();
+          usernameContainer.close();
+          usernameForm.onsubmit = null;
+
+          initApp();
+        });
     };
 
     usernameContainer.showModal();
