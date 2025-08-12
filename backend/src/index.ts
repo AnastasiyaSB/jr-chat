@@ -119,35 +119,37 @@ async function initServer() {
       return;
     }
 
-    function validateForm(username: unknown, text: unknown) {
-      if (typeof username !== "string") {
-        return { field: "username", message: "Incorrect username (Username must be a string)" };
-      }
+    // function validateForm(username: unknown, text: unknown) {
+    //   if (typeof username !== "string") {
+    //     return { field: "username", message: "Incorrect username (Username must be a string)" };
+    //   }
 
-      if (username.length < 2) {
-        return { field: "username", message: "Incorrect length of username (too short)" };
-      }
+    //   if (username.length < 2) {
+    //     return { field: "username", message: "Incorrect length of username (too short)" };
+    //   }
 
-      if (username.length > 50) {
-        return { field: "username", message: "Incorrect length of username (too long)" };
-      }
+    //   if (username.length > 50) {
+    //     return { field: "username", message: "Incorrect length of username (too long)" };
+    //   }
 
-      if (typeof text !== "string") {
-        return { field: "text", message: "Incorrect message text (Message must be a string)" };
-      }
+    //   if (typeof text !== "string") {
+    //     return { field: "text", message: "Incorrect message text (Message must be a string)" };
+    //   }
 
-      if (text.trim().length === 0) {
-        return { field: "text", message: "Message cannot be empty" };
-      }
+    //   if (text.trim().length === 0) {
+    //     return { field: "text", message: "Message cannot be empty" };
+    //   }
 
-      if (text.length < 1) {
-        return { field: "text", message: "Incorrect length of message (too short)" };
-      }
+    //   if (text.length < 1) {
+    //     return { field: "text", message: "Incorrect length of message (too short)" };
+    //   }
 
-      if (text.length > 500) {
-        return { field: "text", message: "Incorrect length of message (too long)" };
-      }
-    }
+    //   if (text.length > 500) {
+    //     return { field: "text", message: "Incorrect length of message (too long)" };
+    //   }
+    // }
+
+    // const username = req.body.username;
 
     // const error = validateForm(username, text);
     // if (error) {
