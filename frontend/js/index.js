@@ -1,88 +1,39 @@
-/**
- * Требования:
- * - Прозрачная обратная связь — в любой момент времени пользователь
- *   должен понимать что происходит с интерфейсомы
- *   - Можно ли писать текст сообщения?
- *   - Валидно ли сообщение, которое он отправляет и можно ли его отправить?
- *   - После отправки 
- *    - началась ли отправка?
- *    - пришло ли сообщение на сервер? удачно ли?
- *    - [отображение сообщения в списке]
- * 
- * 1. Я нажал на кнопку отправить
- * 2. На сервер ушел POST-запрос
- * 3. Сервер обработал этот запрос
- * 4. Вернул мне ответ
- * 5. Я обработал ответ, понял есть ли ошибка
- * 6. Если нет ошибки — показал это
- * 6.1 Если есть ошибка — показал это
- * 
- * Хорошо бы дать возможность пользователю не отправлять одно и то же сообщение
- * несколько раз
- * 
- * Способы обратной связи 
- * 1. Ничего не делать
- * 2. Все заблокировать
- *   1. Заблокировать поле ввода и кнопку и поменять текст на кнопке
- *   2. Если удачно — разблокировать и вернуть текст обратно, очистить форму и отобразить обновленный список сообщений
- *   3. Если ошибка — разблокировать и вернуть текст обратно, не сбрасывать форму и показать ошибку
- * 3. Optimistic UI
- *   1. Мгновенно обновляет список сообщений и показывает наше сообщение в списке
- *      Очищает форму и дает возможность отправить новое сообщение
- *      Вновь созданному сообщению добавляет визуальный индикатор о его состоянии
- * 
- * 
- * 
- * 
- * Ввод имени пользователя
- * - [x] изначально имя пользователя не задано - null
- * 
- * - [x] если имени пользователя нет — показываем соответствующий экран
- * - [ ] при вводе имя сохраняется в localStorage
- * - [ ] введенное имя отправляется в каждом сообщении
- * 
- * - при рендеринге списка сообщений, если имя пользователя совпадает с 
- *   введенным именем, это сообщение показывается справа
- */
 
-document.addEventListener('DOMContentLoaded', function () {
-  const menuButton = document.getElementById('menuButton');
-  const dropdown = document.getElementById('headerDropdown');
-
-  menuButton.addEventListener('click', function (e) {
-    e.stopPropagation();
-    dropdown.classList.toggle('show');
-  });
-
-  document.addEventListener('click', function (e) {
-    if (!dropdown.contains(e.target) && !menuButton.contains(e.target)) {
-      dropdown.classList.remove('show');
-    }
-  });
-})
-
-document.addEventListener('DOMContentLoaded', function () {
-  document.addEventListener('click', function (e) {
-    
-    if (e.target.closest('.message-control')) {
-      const messageHeader = e.target.closest('.message-header');
-      const dropdown = messageHeader.querySelector('.dropdown-menu-message');
-
-      document.querySelectorAll('.dropdown-menu-message.show').forEach(menu => {
-        if (menu !== dropdown) {
-          
-          menu.classList.remove('show');
-        }
-      });
-
-      dropdown.classList.toggle('show');
-    } else if (!e.target.closest('.dropdown-menu-message')) {
-      document.querySelectorAll('.dropdown-menu-message.show').forEach(menu => {
-        menu.classList.remove('show');
-      });
-    }
-  });
+const menuButton = document.getElementById('menuButton');
+const dropdown = document.getElementById('headerDropdown');
+menuButton.addEventListener('click', function (e) {
+  e.stopPropagation();
+  dropdown.classList.toggle('show');
 });
+
+document.addEventListener('click', function (e) {
+  if (!dropdown.contains(e.target) && !menuButton.contains(e.target)) {
+    dropdown.classList.remove('show');
+  }
+});
+
+let openedDropdown = null;
+document.addEventListener('click', function (e) {
+  const control = e.target.closest('.message-control');
+  const dropdownClick = e.target.closest('.dropdown-menu-message');
+
+  if (control) {
+    const messageHeader = control.closest('.message-header');
+    const dropdown = messageHeader.querySelector('.dropdown-menu-message');
+
+    if (openedDropdown && openedDropdown !== dropdown) {
+      openedDropdown.classList.remove('show');
+    }
+
+    dropdown.classList.toggle('show');
+    openedDropdown = dropdown.classList.contains('show') ? dropdown : null;
+  } 
+  else if (!dropdownClick && openedDropdown) {
+    openedDropdown.classList.remove('show');
+    openedDropdown = null;
+  }
+});
+
 
 {
   const USERNAME_REC = "username";
@@ -272,31 +223,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
   initApp();
 
-  
+  function logout() {
+    localStorage.removeItem(USERNAME_REC);
+    username = null;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    function logout() {
-      localStorage.removeItem(USERNAME_REC);
-      username = null;
-
-      const usernameInput = document.querySelector('.username input[name="username"]');
-      if (usernameInput) {
-        usernameInput.value = "";
-      }
-
-      initApp();
+    const usernameInput = document.querySelector('.username input[name="username"]');
+    if (usernameInput) {
+      usernameInput.value = "";
     }
 
-    function setLogout() {
-      const logoutItem = document.getElementById('logoutItem');
+    initApp();
+  }
 
-      logoutItem.addEventListener('click', function() {
-        logout();
+  function setLogout() {
+    const logoutItem = document.getElementById('logoutItem');
 
-        document.getElementById('headerDropdown').classList.remove('show');
-      })
-    }
+    logoutItem.addEventListener('click', function() {
+      logout();
+
+      document.getElementById('headerDropdown').classList.remove('show');
+    })
+  }
     
-    setLogout();
-  });
+  setLogout();
 }
