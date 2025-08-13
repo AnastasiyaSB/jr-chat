@@ -18,6 +18,42 @@ const pgClient = new Client();
 const server = express();
 const PORT = process.env.APP_PORT || 4000;
 
+type ValidationError = {
+  field: 'username' | 'text';
+  message: string;
+} | null;
+
+function validateForm(inputType: 'username' | 'text', value: unknown): ValidationError {
+  if (inputType === 'username') {
+    if (typeof value !== 'string') {
+      return { field: 'username', message: 'Username must be a string' };
+    }
+    if (value.length < 2) {
+      return { field: 'username', message: 'Username is too short (min 2 chars)' };
+    }
+    if (value.length > 50) {
+      return { field: 'username', message: 'Username is too long (max 50 chars)' };
+    }
+    if (!/^[A-Za-zА-Яа-яЁё]+$/.test(value)) {
+      return { field: "username", message: "Username must contain only letters" };
+    }
+  }
+
+  if (inputType === 'text') {
+    if (typeof value !== 'string') {
+      return { field: 'text', message: 'Message must be a string' };
+    }
+    if (value.trim().length === 0) {
+      return { field: 'text', message: 'Message cannot be empty' };
+    }
+    if (value.length > 500) {
+      return { field: 'text', message: 'Message is too long (max 500 chars)' };
+    }
+  }
+
+  return null;
+}
+
 async function initServer() {
   if (!process.env.PGUSER) {
     throw new Error("Server cannot be started without database credentials provided in .env file");
@@ -63,6 +99,13 @@ async function initServer() {
 
   server.post("/users", async function (req: Request, res: Response) {
     const { username } = req.body;
+
+    const usernameError = validateForm('username', username);
+    if (usernameError) {
+      res.status(400).json({ message: usernameError.message });
+      return;
+    }
+
     const user = await getUserByName(username);
 
     if (user !== null) {
@@ -118,45 +161,13 @@ async function initServer() {
 
       return;
     }
-
-    // function validateForm(username: unknown, text: unknown) {
-    //   if (typeof username !== "string") {
-    //     return { field: "username", message: "Incorrect username (Username must be a string)" };
-    //   }
-
-    //   if (username.length < 2) {
-    //     return { field: "username", message: "Incorrect length of username (too short)" };
-    //   }
-
-    //   if (username.length > 50) {
-    //     return { field: "username", message: "Incorrect length of username (too long)" };
-    //   }
-
-    //   if (typeof text !== "string") {
-    //     return { field: "text", message: "Incorrect message text (Message must be a string)" };
-    //   }
-
-    //   if (text.trim().length === 0) {
-    //     return { field: "text", message: "Message cannot be empty" };
-    //   }
-
-    //   if (text.length < 1) {
-    //     return { field: "text", message: "Incorrect length of message (too short)" };
-    //   }
-
-    //   if (text.length > 500) {
-    //     return { field: "text", message: "Incorrect length of message (too long)" };
-    //   }
-    // }
-
-    // const username = req.body.username;
-
-    // const error = validateForm(username, text);
-    // if (error) {
-    //   res.status(400).send({ message: error.message });
-    //   return;
-    // }
     
+    const textError = validateForm('text', text);
+    if (textError) {
+      res.status(400).json({ message: textError.message });
+      return;
+    }
+
     let newMessageResponse;
     
     try {
