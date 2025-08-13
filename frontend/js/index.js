@@ -140,32 +140,11 @@ document.addEventListener('click', function (e) {
   }
 
   function initChat() {
-    // HTTP
-    // Request --> Response
-    // Polling
-
-    // Websocket
-    // Message <--> Message
     getMessages();
     setInterval(getMessages, 3000);
     initForm();
-
-    // Как правильно скроллить?
-    // - Когда мы сами отправили [новое сообщение]
-    // - Когда мы находимся внизу списка и пришло [новое сообщение]
-    // - Когда мы только загрузили страницу
-
-    // | | | | | | | | | |
-    //        | ||  ||| |
   }
 
-  // Форма может жить в двух состояниях — модальное окно показано и модальное окно
-  // не показано
-  // Режим когда окно не показано может быть инициализирован после того как 
-  // имя пользователя было введено
-  // При создании функционала некоего модуля, который описывает работу
-  // с DOM, нужно описывать не только инициализацию, но и "разрушение"
-  // этого модуля
   function initUsernameForm() {
     const usernameForm = usernameContainer.querySelector("form");
 
@@ -205,11 +184,7 @@ document.addEventListener('click', function (e) {
     usernameContainer.showModal();
   }
 
-  // Модальное приложение
-  // Модальность — зависимость от состояния
-  // В нашем случае режим переключается наличием username
-  // - есть username — режим чата
-  // - нет username — режим ввода username
+ 
   function initApp() {
     username = localStorage.getItem(USERNAME_REC);
 
