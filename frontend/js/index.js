@@ -1,8 +1,7 @@
 
-const menuButton = document.getElementById('menuButton');
-const dropdown = document.getElementById('headerDropdown');
+const menuButton = document.getElementById('main-menu-btn');
+const dropdown = document.getElementById('header-dropdown-menu');
 menuButton.addEventListener('click', function (e) {
-  e.stopPropagation();
   dropdown.classList.toggle('show');
 });
 
@@ -199,24 +198,20 @@ document.addEventListener('click', function (e) {
   initApp();
 
   function logout() {
-    localStorage.removeItem(USERNAME_REC);
-    username = null;
+      localStorage.removeItem(USERNAME_REC);
+      username = null;
 
-    const usernameInput = document.querySelector('.username input[name="username"]');
-    if (usernameInput) {
-      usernameInput.value = "";
-    }
-
-    initApp();
+      document.querySelector('.username input[name="username"]').value = "";
+      initApp();
   }
 
   function setLogout() {
-    const logoutItem = document.getElementById('logoutItem');
+    const logoutItem = document.getElementById('logout-item');
 
     logoutItem.addEventListener('click', function() {
       logout();
 
-      document.getElementById('headerDropdown').classList.remove('show');
+      document.getElementById('header-dropdown-menu').classList.remove('show');
     })
   }
     
