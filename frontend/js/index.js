@@ -1,87 +1,37 @@
-/**
- * Требования:
- * - Прозрачная обратная связь — в любой момент времени пользователь
- *   должен понимать что происходит с интерфейсомы
- *   - Можно ли писать текст сообщения?
- *   - Валидно ли сообщение, которое он отправляет и можно ли его отправить?
- *   - После отправки 
- *    - началась ли отправка?
- *    - пришло ли сообщение на сервер? удачно ли?
- *    - [отображение сообщения в списке]
- * 
- * 1. Я нажал на кнопку отправить
- * 2. На сервер ушел POST-запрос
- * 3. Сервер обработал этот запрос
- * 4. Вернул мне ответ
- * 5. Я обработал ответ, понял есть ли ошибка
- * 6. Если нет ошибки — показал это
- * 6.1 Если есть ошибка — показал это
- * 
- * Хорошо бы дать возможность пользователю не отправлять одно и то же сообщение
- * несколько раз
- * 
- * Способы обратной связи 
- * 1. Ничего не делать
- * 2. Все заблокировать
- *   1. Заблокировать поле ввода и кнопку и поменять текст на кнопке
- *   2. Если удачно — разблокировать и вернуть текст обратно, очистить форму и отобразить обновленный список сообщений
- *   3. Если ошибка — разблокировать и вернуть текст обратно, не сбрасывать форму и показать ошибку
- * 3. Optimistic UI
- *   1. Мгновенно обновляет список сообщений и показывает наше сообщение в списке
- *      Очищает форму и дает возможность отправить новое сообщение
- *      Вновь созданному сообщению добавляет визуальный индикатор о его состоянии
- * 
- * 
- * 
- * 
- * Ввод имени пользователя
- * - [x] изначально имя пользователя не задано - null
- * 
- * - [x] если имени пользователя нет — показываем соответствующий экран
- * - [ ] при вводе имя сохраняется в localStorage
- * - [ ] введенное имя отправляется в каждом сообщении
- * 
- * - при рендеринге списка сообщений, если имя пользователя совпадает с 
- *   введенным именем, это сообщение показывается справа
- */
 
-document.addEventListener('DOMContentLoaded', function () {
-  const menuButton = document.getElementById('menuButton');
-  const dropdown = document.getElementById('headerDropdown');
+const menuButton = document.getElementById('main-menu-btn');
+const dropdown = document.getElementById('header-dropdown-menu');
 
-  menuButton.addEventListener('click', function (e) {
-    e.stopPropagation();
+menuButton.addEventListener('click', function (e) {
+  dropdown.classList.toggle('show');
+});
+
+document.addEventListener('click', function (e) {
+  if (!dropdown.contains(e.target) && !menuButton.contains(e.target)) {
+    dropdown.classList.remove('show');
+  }
+});
+
+let openedDropdown = null;
+document.addEventListener('click', function (e) {
+  const control = e.target.closest('.message-control');
+  const dropdownClick = e.target.closest('.dropdown-menu-message');
+
+  if (control) {
+    const messageHeader = control.closest('.message-header');
+    const dropdown = messageHeader.querySelector('.dropdown-menu-message');
+
+    if (openedDropdown && openedDropdown !== dropdown) {
+      openedDropdown.classList.remove('show');
+    }
+
     dropdown.classList.toggle('show');
-  });
-
-  document.addEventListener('click', function (e) {
-    if (!dropdown.contains(e.target) && !menuButton.contains(e.target)) {
-      dropdown.classList.remove('show');
-    }
-  });
-})
-
-document.addEventListener('DOMContentLoaded', function () {
-  document.addEventListener('click', function (e) {
-    
-    if (e.target.closest('.message-control')) {
-      const messageHeader = e.target.closest('.message-header');
-      const dropdown = messageHeader.querySelector('.dropdown-menu-message');
-
-      document.querySelectorAll('.dropdown-menu-message.show').forEach(menu => {
-        if (menu !== dropdown) {
-          
-          menu.classList.remove('show');
-        }
-      });
-
-      dropdown.classList.toggle('show');
-    } else if (!e.target.closest('.dropdown-menu-message')) {
-      document.querySelectorAll('.dropdown-menu-message.show').forEach(menu => {
-        menu.classList.remove('show');
-      });
-    }
-  });
+    openedDropdown = dropdown.classList.contains('show') ? dropdown : null;
+  } 
+  else if (!dropdownClick && openedDropdown) {
+    openedDropdown.classList.remove('show');
+    openedDropdown = null;
+  }
 });
 
 {
@@ -189,32 +139,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function initChat() {
-    // HTTP
-    // Request --> Response
-    // Polling
-
-    // Websocket
-    // Message <--> Message
     getMessages();
     setInterval(getMessages, 3000);
     initForm();
-
-    // Как правильно скроллить?
-    // - Когда мы сами отправили [новое сообщение]
-    // - Когда мы находимся внизу списка и пришло [новое сообщение]
-    // - Когда мы только загрузили страницу
-
-    // | | | | | | | | | |
-    //        | ||  ||| |
   }
 
-  // Форма может жить в двух состояниях — модальное окно показано и модальное окно
-  // не показано
-  // Режим когда окно не показано может быть инициализирован после того как 
-  // имя пользователя было введено
-  // При создании функционала некоего модуля, который описывает работу
-  // с DOM, нужно описывать не только инициализацию, но и "разрушение"
-  // этого модуля
   function initUsernameForm() {
     const usernameForm = usernameContainer.querySelector("form");
 
@@ -236,11 +165,6 @@ document.addEventListener('DOMContentLoaded', function () {
     usernameContainer.showModal();
   }
 
-  // Модальное приложение
-  // Модальность — зависимость от состояния
-  // В нашем случае режим переключается наличием username
-  // - есть username — режим чата
-  // - нет username — режим ввода username
   function initApp() {
     username = localStorage.getItem(USERNAME_REC);
 
@@ -254,31 +178,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
   initApp();
 
-  
-
-  document.addEventListener('DOMContentLoaded', () => {
     function logout() {
       localStorage.removeItem(USERNAME_REC);
       username = null;
 
-      const usernameInput = document.querySelector('.username input[name="username"]');
-      if (usernameInput) {
-        usernameInput.value = "";
-      }
-
+      document.querySelector('.username input[name="username"]').value = "";
       initApp();
     }
 
     function setLogout() {
-      const logoutItem = document.getElementById('logoutItem');
+      const logoutItem = document.getElementById('logout-item');
 
       logoutItem.addEventListener('click', function() {
         logout();
 
-        document.getElementById('headerDropdown').classList.remove('show');
+        document.getElementById('header-dropdown-menu').classList.remove('show');
       })
     }
     
     setLogout();
-  });
 }

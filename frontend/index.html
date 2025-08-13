@@ -7,24 +7,16 @@
   <title>Online Chat</title>
 </head>
 <body>
-
   <header>
     <h1>Online Chat</h1>
     <div class="control-menu">
-      <button id="menuButton" class="menu-button"></button>
-      <ul id="headerDropdown" class="dropdown-menu">
+      <button id="main-menu-btn" class="menu-button"></button>
+      <ul id="header-dropdown-menu" class="dropdown-menu">
         <li>Edit name</li>
-        <li id="logoutItem">Logout</li>
+        <li id="logout-item">Logout</li>
       </ul>
     </div>
   </header>
-
-<!--
-  2. Отрисовка этого сообщения
-  1. Отправка сообщения на сервер
-    - Валидация сообщения
-  3. Периодическая отрисовка всех сообщений
--->
   <!-- <h2 class="dialog-title">Online Chat</h2> -->
   <dialog class="username">
     <form method="POST">
@@ -35,11 +27,8 @@
       <button type="submit" class="join-button">Join</button>
     </form>
   </dialog>
-
 <main>
   <section class="messages"></section>
-
-
   <section class="form" id="message-form">
     <form method="POST" action="/">
       <input type="hidden" name="username" value="guest001"/>
@@ -48,8 +37,6 @@
     </form>
   </section>
 </main>
-
 <script src="./js/index.js"></script>
-
 </body>
 </html>

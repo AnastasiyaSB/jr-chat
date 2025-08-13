@@ -36,28 +36,6 @@ server.get("/messages", function(req: Request, res: Response) {
 server.post("/messages", function(req: Request, res: Response) {
   const { username, text } = req.body;
 
-  // 2 Стратегии валидации
-  //   1. Проверяются все ошибки и отправляются скопом
-  //   2. Проверка останавливается на первой попавшейся ошибке и отправляется эта ошибка
-
-  // *Некрасивенько, что в одном if проводятся сразу все проверки username
-  // потому что сложно сформировать адекватное сообщение об ошибке
-  // if (typeof username !== "string" || username.length < 2 || username.length > 50) {
-  //   res.status(400).send({
-  //     message: "Incorrect username",
-  //   });
-
-  //   return;
-  // }
-
-  // if (typeof text !== "string" || text.length < 1 || text.length > 500) {
-  //   res.status(400).send({
-  //     message: "Incorrect message text",
-  //   });
-
-  //   return;
-  // }
-
   function validateForm(username: unknown, text: unknown) {
      if (typeof username !== "string") {
       return { field: "username", message: "Incorrect username (Username must be a string)" };
@@ -87,7 +65,7 @@ server.post("/messages", function(req: Request, res: Response) {
       return { field: "text", message: "Incorrect length of message (too long)" };
     }
 
-    return;
+    return null;
   }
 
   const error = validateForm(username, text);
