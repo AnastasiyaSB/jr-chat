@@ -1,49 +1,37 @@
-/**
- * Требования:
- * - Прозрачная обратная связь — в любой момент времени пользователь
- *   должен понимать что происходит с интерфейсомы
- *   - Можно ли писать текст сообщения?
- *   - Валидно ли сообщение, которое он отправляет и можно ли его отправить?
- *   - После отправки 
- *    - началась ли отправка?
- *    - пришло ли сообщение на сервер? удачно ли?
- *    - [отображение сообщения в списке]
- * 
- * 1. Я нажал на кнопку отправить
- * 2. На сервер ушел POST-запрос
- * 3. Сервер обработал этот запрос
- * 4. Вернул мне ответ
- * 5. Я обработал ответ, понял есть ли ошибка
- * 6. Если нет ошибки — показал это
- * 6.1 Если есть ошибка — показал это
- * 
- * Хорошо бы дать возможность пользователю не отправлять одно и то же сообщение
- * несколько раз
- * 
- * Способы обратной связи 
- * 1. Ничего не делать
- * 2. Все заблокировать
- *   1. Заблокировать поле ввода и кнопку и поменять текст на кнопке
- *   2. Если удачно — разблокировать и вернуть текст обратно, очистить форму и отобразить обновленный список сообщений
- *   3. Если ошибка — разблокировать и вернуть текст обратно, не сбрасывать форму и показать ошибку
- * 3. Optimistic UI
- *   1. Мгновенно обновляет список сообщений и показывает наше сообщение в списке
- *      Очищает форму и дает возможность отправить новое сообщение
- *      Вновь созданному сообщению добавляет визуальный индикатор о его состоянии
- * 
- * 
- * 
- * 
- * Ввод имени пользователя
- * - [x] изначально имя пользователя не задано - null
- * 
- * - [x] если имени пользователя нет — показываем соответствующий экран
- * - [ ] при вводе имя сохраняется в localStorage
- * - [ ] введенное имя отправляется в каждом сообщении
- * 
- * - при рендеринге списка сообщений, если имя пользователя совпадает с 
- *   введенным именем, это сообщение показывается справа
- */
+
+const menuButton = document.getElementById('main-menu-btn');
+const dropdown = document.getElementById('header-dropdown-menu');
+menuButton.addEventListener('click', function (e) {
+  dropdown.classList.toggle('show');
+});
+
+document.addEventListener('click', function (e) {
+  if (!dropdown.contains(e.target) && !menuButton.contains(e.target)) {
+    dropdown.classList.remove('show');
+  }
+});
+
+let openedDropdown = null;
+document.addEventListener('click', function (e) {
+  const control = e.target.closest('.message-control');
+  const dropdownClick = e.target.closest('.dropdown-menu-message');
+
+  if (control) {
+    const messageHeader = control.closest('.message-header');
+    const dropdown = messageHeader.querySelector('.dropdown-menu-message');
+
+    if (openedDropdown && openedDropdown !== dropdown) {
+      openedDropdown.classList.remove('show');
+    }
+
+    dropdown.classList.toggle('show');
+    openedDropdown = dropdown.classList.contains('show') ? dropdown : null;
+  } 
+  else if (!dropdownClick && openedDropdown) {
+    openedDropdown.classList.remove('show');
+    openedDropdown = null;
+  }
+});
 
 
 {
@@ -64,8 +52,14 @@
 
       messageElement.innerHTML = `
         <div class="message-header">
-          <div class="message-author">${message.username}</div>
-          <button class="message-control"></button>
+          <div class="message-author">${message.username ?? `<span class="message-author-deleted">✖️ Пользователь удален</span>`}</div>
+          <button class="message-control">...</button>
+          <ul class="dropdown-menu-message">
+            <li>View</li>
+            <li>Edit</li>
+            <li>Delete</li>
+            <li>Item</li>
+          </ul>
         </div>
         <p class="message-text">${message.text}</p>
         <time class="message-time">${message.timestamp}</time>
@@ -74,7 +68,7 @@
       chatContainer.appendChild(messageElement);
     }
   }
-
+  
   function getMessages(cb) {
     fetch("http://localhost:4000/messages", {
       method: "GET",
@@ -114,7 +108,7 @@
       const formData = new FormData(evt.target);
 
       const messageData = {
-        username: formData.get("username"),
+        user_id: formData.get("username"),
         text: formData.get("text"),
       };
 
@@ -145,32 +139,11 @@
   }
 
   function initChat() {
-    // HTTP
-    // Request --> Response
-    // Polling
-
-    // Websocket
-    // Message <--> Message
     getMessages();
     setInterval(getMessages, 3000);
     initForm();
-
-    // Как правильно скроллить?
-    // - Когда мы сами отправили [новое сообщение]
-    // - Когда мы находимся внизу списка и пришло [новое сообщение]
-    // - Когда мы только загрузили страницу
-
-    // | | | | | | | | | |
-    //        | ||  ||| |
   }
 
-  // Форма может жить в двух состояниях — модальное окно показано и модальное окно
-  // не показано
-  // Режим когда окно не показано может быть инициализирован после того как 
-  // имя пользователя было введено
-  // При создании функционала некоего модуля, который описывает работу
-  // с DOM, нужно описывать не только инициализацию, но и "разрушение"
-  // этого модуля
   function initUsernameForm() {
     const usernameForm = usernameContainer.querySelector("form");
 
@@ -181,22 +154,36 @@
       const formData = new FormData(formElement);
       const enteredUsername = formData.get("username");
 
-      localStorage.setItem(USERNAME_REC, enteredUsername);
+      fetch("http://localhost:4000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "username": enteredUsername,
+        }),
+      })
+        .then(function(authResponse) {
+          if (authResponse.status !== 200) {
+            //
+          }
 
-      usernameContainer.close();
-      usernameForm.onsubmit = null;
+          return authResponse.json();
+        })
+        .then(function(authResponseData) {
+          localStorage.setItem(USERNAME_REC, authResponseData.user_id);
 
-      initApp();
+          usernameContainer.close();
+          usernameForm.onsubmit = null;
+
+          initApp();
+        });
     };
 
     usernameContainer.showModal();
   }
 
-  // Модальное приложение
-  // Модальность — зависимость от состояния
-  // В нашем случае режим переключается наличием username
-  // - есть username — режим чата
-  // - нет username — режим ввода username
+ 
   function initApp() {
     username = localStorage.getItem(USERNAME_REC);
 
@@ -209,4 +196,24 @@
   }
 
   initApp();
+
+  function logout() {
+      localStorage.removeItem(USERNAME_REC);
+      username = null;
+
+      document.querySelector('.username input[name="username"]').value = "";
+      initApp();
+  }
+
+  function setLogout() {
+    const logoutItem = document.getElementById('logout-item');
+
+    logoutItem.addEventListener('click', function() {
+      logout();
+
+      document.getElementById('header-dropdown-menu').classList.remove('show');
+    })
+  }
+    
+  setLogout();
 }
